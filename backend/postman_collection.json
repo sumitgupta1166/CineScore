@@ -1,0 +1,342 @@
+{
+  "info": {
+    "name": "Movie Review Platform API",
+    "_postman_id": "12345678-abcd-efgh-ijkl-1234567890ab",
+    "description": "Postman tests for Movie Review Platform backend (MERN). Includes Auth, Movies, Reviews, Users, Watchlist, Logout.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/register",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"username\": \"testuser\", \"email\": \"test@example.com\", \"password\": \"TestPass123\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () { pm.response.to.have.status(201); });",
+                  "pm.test(\"Response contains user id\", function () { pm.expect(pm.response.json().data.id).to.exist; });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"email\": \"test@example.com\", \"password\": \"TestPass123\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () { pm.response.to.have.status(200); });",
+                  "var json = pm.response.json();",
+                  "pm.environment.set(\"accessToken\", json.data.accessToken);",
+                  "pm.environment.set(\"refreshToken\", json.data.refreshToken);",
+                  "pm.environment.set(\"userId\", json.data.user._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/api/v1/auth/refresh",
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"refreshToken\": \"{{refreshToken}}\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Token refreshed\", function () { pm.response.to.have.status(200); });",
+                  "pm.environment.set(\"accessToken\", pm.response.json().data.accessToken);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/auth/logout",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"Logged out successfully\", function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Movies",
+      "item": [
+        {
+          "name": "List Movies",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/movies?page=1&limit=5" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Fetched movies\", function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().data.data).to.be.an('array');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create Movie (Admin)",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/movies",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"title\": \"Test Movie\", \"genres\": [\"Drama\"], \"releaseYear\": 2023, \"director\": \"John Doe\", \"synopsis\": \"Test synopsis\" }"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Movie created\", function () { pm.response.to.have.status(201); });",
+                  "pm.environment.set(\"movieId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Movie by ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/movies/{{movieId}}" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"Fetched movie\", function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Add Review",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/movies/{{movieId}}/reviews",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"rating\": 5, \"text\": \"Awesome movie!\" }" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Review created\", function () { pm.response.to.have.status(201); });",
+                  "pm.environment.set(\"reviewId\", pm.response.json().data._id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Reviews for Movie",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/movies/{{movieId}}/reviews" },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Reviews fetched\", function () { pm.response.to.have.status(200); });",
+                  "pm.expect(pm.response.json().data).to.be.an('array');"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Review",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"rating\": 4, \"text\": \"Updated review text\" }" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"Review updated\", function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/reviews/{{reviewId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["pm.test(\"Review deleted\", function () { pm.response.to.have.status(200); });"]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Get User Profile",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/users/{{userId}}" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"Fetched profile\", function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"profilePicture\": \"http://example.com/pic.jpg\" }" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"User updated\", function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        },
+        {
+          "name": "Add to Watchlist",
+          "request": {
+            "method": "POST",
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/watchlist",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{accessToken}}" }
+            ],
+            "body": { "mode": "raw", "raw": "{ \"movieId\": \"{{movieId}}\" }" }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"Movie added to watchlist\", function () { pm.response.to.have.status(201); });"] }
+            }
+          ]
+        },
+        {
+          "name": "Get Watchlist",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/watchlist",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"Fetched watchlist\", function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        },
+        {
+          "name": "Remove from Watchlist",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/users/{{userId}}/watchlist/{{movieId}}",
+            "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }]
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"Removed from watchlist\", function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/health" },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "exec": ["pm.test(\"Health OK\", function () { pm.response.to.have.status(200); });"] }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8000" },
+    { "key": "accessToken", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "userId", "value": "" },
+    { "key": "movieId", "value": "" },
+    { "key": "reviewId", "value": "" }
+  ]
+}
