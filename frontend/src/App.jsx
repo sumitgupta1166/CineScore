@@ -8,6 +8,7 @@ import Profile from "./pages/Profile";
 import AdminDashboard from "./pages/AdminDashboard";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import AddMovie from "./pages/AddMovie";
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -41,6 +42,14 @@ export default function App() {
           {/* Movies */}
           <Route path="/" element={<Navigate to="/movies" />} />
           <Route path="/movies" element={<Movies />} />
+          <Route
+            path="/movies/new"
+            element={
+              <AdminRoute>
+                <AddMovie />
+              </AdminRoute>
+            }
+          />
           <Route path="/movies/:id" element={<MoviePage />} />
 
           {/* Profile */}
@@ -71,7 +80,8 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 text-white text-center py-4 mt-auto shadow-lg">
         <p className="text-sm">
-          🎬 CineScope &copy; {new Date().getFullYear()} | Built with MERN + Tailwind
+          🎬 CineScope &copy; {new Date().getFullYear()} | Built with MERN +
+          Tailwind
         </p>
       </footer>
     </div>

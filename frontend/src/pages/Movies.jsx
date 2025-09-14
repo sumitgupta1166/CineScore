@@ -38,20 +38,36 @@ export default function Movies() {
 
   return (
     <div>
+      {/* Filters */}
       <div className="mb-6 grid gap-4 md:grid-cols-3">
         <form onSubmit={onSearch} className="md:col-span-2 flex gap-2">
-          <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search movies, director, synopsis..." className="flex-1 p-2 rounded border" />
-          <button className="px-4 py-2 rounded bg-indigo-600 text-white">Search</button>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search movies, director, synopsis..."
+            className="flex-1 p-2 rounded border"
+          />
+          <button className="px-4 py-2 rounded bg-indigo-600 text-white">
+            Search
+          </button>
         </form>
         <div className="flex gap-2">
-          <select value={genre} onChange={(e) => setGenre(e.target.value)} className="p-2 border rounded">
+          <select
+            value={genre}
+            onChange={(e) => setGenre(e.target.value)}
+            className="p-2 border rounded"
+          >
             <option value="">All Genres</option>
             <option>Action</option>
             <option>Drama</option>
             <option>Comedy</option>
             <option>Thriller</option>
           </select>
-          <select value={minRating} onChange={(e) => setMinRating(e.target.value)} className="p-2 border rounded">
+          <select
+            value={minRating}
+            onChange={(e) => setMinRating(e.target.value)}
+            className="p-2 border rounded"
+          >
             <option value="">Any rating</option>
             <option value="4">4+</option>
             <option value="3">3+</option>
@@ -60,23 +76,49 @@ export default function Movies() {
         </div>
       </div>
 
+      {/* Movies grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {movies.map((m) => (
           <MovieCard key={m._id} movie={m} />
         ))}
       </div>
 
+      {/* Pagination + Admin Options */}
       <div className="mt-6 flex items-center justify-between">
-        <div>
+        <div className="flex gap-3">
           {userRole === "admin" && (
-            <Link to="/admin" className="px-4 py-2 bg-green-600 text-white rounded">Go to Admin Dashboard</Link>
+            <>
+              <Link
+                to="/movies/new"
+                className="px-4 py-2 bg-green-600 text-white rounded shadow hover:bg-green-700"
+              >
+                ➕ Add Movie
+              </Link>
+              <Link
+                to="/admin"
+                className="px-4 py-2 bg-indigo-600 text-white rounded shadow hover:bg-indigo-700"
+              >
+                Admin Dashboard
+              </Link>
+            </>
           )}
         </div>
 
         <div className="flex items-center gap-3">
-          <button disabled={page <= 1} onClick={() => setPage((p) => p - 1)} className="px-3 py-1 border rounded">Prev</button>
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => p - 1)}
+            className="px-3 py-1 border rounded"
+          >
+            Prev
+          </button>
           <div>Page {page}</div>
-          <button onClick={() => setPage((p) => p + 1)} className="px-3 py-1 border rounded">Next</button>
+          <button
+            onClick={() => setPage((p) => p + 1)}
+            className="px-3 py-1 border rounded"
+          >
+            Next
+          </button>
         </div>
       </div>
     </div>
